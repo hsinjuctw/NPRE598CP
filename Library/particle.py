@@ -190,95 +190,9 @@ def boris_bunemann_interp( time, x0, params, fcorrection, Bfield):
         X[i,5] = vz
     return X
 
-# this currently doesn't work
-def interp3Dalt(X,Y,Z,Bx_grid,By_grid,Bz_grid,xp,yp,zp):
-    '''
-    a very versatile but super inefficient 3D interpolation routine for 3D vectors
-    '''
-    RE = 6.371e6
-    dX = X[1]-X[0]
-    dY = Y[1]-Y[0]
-    dZ = Z[1]-Z[0]
-    # Obtain index along X, Y, Z coordinates
-    i = int(np.absolute( np.floor( (xp-X[0])/dX )))
-    j = int(np.absolute( np.floor( (yp-Y[0])/dY )))
-    k = int(np.absolute( np.floor( (zp-Z[0])/dZ )))
-    # Get the coordinates of the closest node along x,y
-    xi = X[0] + i * dX
-    yj = Y[0] + j * dY
-    zk = Z[0] + k * dZ
-    print('xi,yj,zk',xi/RE,yj/RE,zk/RE)
-    # interpolate along X
-    # 0                  1
-    # xi----------xp-----xi+dX
-    #     xp-xi    xi+dX-xp
-    w0 = (xi + dX - xp)/dX
-    w1 = (xp - xi)/dX
-    #print('w0,w1',w0,w1)
-    if xi == X[-1]:
-        # on line y = yj   , z = zk
-        Bx00 = Bx_grid[i][ j ][ k ]
-        By00 = By_grid[i][ j ][ k ]
-        Bz00 = Bz_grid[i][ j ][ k ]
-        # on line y = yj+dY, z = zk
-        Bx10 = Bx_grid[i][j+1][ k ]
-        By10 = By_grid[i][j+1][ k ]
-        Bz10 = Bz_grid[i][j+1][ k ]
-        # on line y = yj   , z = zk+dZ
-        Bx01 = Bx_grid[i][ j ][k+1]
-        By01 = By_grid[i][ j ][k+1]
-        Bz01 = Bz_grid[i][ j ][k+1]
-        # on line y = yj+dY, z = zk+dZ
-        Bx11 = Bx_grid[i][j+1][k+1]
-        By11 = By_grid[i][j+1][k+1]
-        Bz11 = Bz_grid[i][j+1][k+1]
-    else:
-        # on line y = yj   , z = zk
-        Bx00 = w0*Bx_grid[i][ j ][ k ]+w1*Bx_grid[i+1][ j ][ k ]
-        By00 = w0*By_grid[i][ j ][ k ]+w1*By_grid[i+1][ j ][ k ]
-        Bz00 = w0*Bz_grid[i][ j ][ k ]+w1*Bz_grid[i+1][ j ][ k ]
-        # on line y = yj+dY, z = zk
-        Bx10 = w0*Bx_grid[i][j+1][ k ]+w1*Bx_grid[i+1][j+1][ k ]
-        By10 = w0*By_grid[i][j+1][ k ]+w1*By_grid[i+1][j+1][ k ]
-        Bz10 = w0*Bz_grid[i][j+1][ k ]+w1*Bz_grid[i+1][j+1][ k ]
-        # on line y = yj   , z = zk+dZ
-        Bx01 = w0*Bx_grid[i][ j ][k+1]+w1*Bx_grid[i+1][ j ][k+1]
-        By01 = w0*By_grid[i][ j ][k+1]+w1*By_grid[i+1][ j ][k+1]
-        Bz01 = w0*Bz_grid[i][ j ][k+1]+w1*Bz_grid[i+1][ j ][k+1]
-        # on line y = yj+dY, z = zk+dZ
-        Bx11 = w0*Bx_grid[i][j+1][k+1]+w1*Bx_grid[i+1][j+1][k+1]
-        By11 = w0*By_grid[i][j+1][k+1]+w1*By_grid[i+1][j+1][k+1]
-        Bz11 = w0*Bz_grid[i][j+1][k+1]+w1*Bz_grid[i+1][j+1][k+1]
-    # interpolate along Y
-    # 0                  1
-    # yj----------yp-----yj+dY
-    #     yp-yj    yj+dY-yp
-    w2 = (yj + dY - yp)/dY
-    w3 = (yp - yj)/dY
-    #print('w2,w3',w2,w3)
-    # on line z = zk
-    Bx0 = w2*Bx00 + w3*Bx10
-    By0 = w2*By00 + w3*By10
-    Bz0 = w2*Bz00 + w3*Bz10
-    # on line z = zk+dZ
-    Bx1 = w2*Bx01 + w3*Bx11
-    By1 = w2*By01 + w3*By11
-    Bz1 = w2*Bz01 + w3*Bz11
-    # interpolate along Z
-    # 0                  1
-    # zk----------zp-----zk+dZ
-    #     zp-zk    zk+dZ-zp
-    w4 = (zk + dZ - zp)/dZ
-    w5 = (zp - zk)/dZ
-    #print('w4,w5',w4,w5)
-    Bx = w4*Bx0 + w5*Bx1
-    By = w4*By0 + w5*By1
-    Bz = w4*Bz0 + w5*Bz1
-    return Bx,By,Bz
-
 def interp3D(X,Y,Z,Bx_grid,By_grid,Bz_grid,xp,yp,zp):
     '''
-    a very versatile but super inefficient 3D interpolation routine for 3D vectors
+    a very versatile but super inefficient 3D interpolation routine for 3 3D vectors
     '''
     dX = X[1]-X[0]
     dY = Y[1]-Y[0]
@@ -311,61 +225,52 @@ def interp3D(X,Y,Z,Bx_grid,By_grid,Bz_grid,xp,yp,zp):
     w5 = A5 / At
     w6 = A6 / At
     w7 = A7 / At
-    #print(w0+w1+w2+w3+w4+w5+w6+w7)
+    Bx = w0 * Bx_grid[ i ][ j ][ k ]
+    By = w0 * By_grid[ i ][ j ][ k ]
+    Bz = w0 * Bz_grid[ i ][ j ][ k ]
     if xi == X[-1]:
         if yj == Y[-1]:
-            Bx = w0 * Bx_grid[ i ][ j ][ k ] + w4 * Bx_grid[ i ][ j ][k+1]
-            By = w0 * By_grid[ i ][ j ][ k ] + w4 * By_grid[ i ][ j ][k+1]
-            Bz = w0 * Bz_grid[ i ][ j ][ k ] + w4 * Bz_grid[ i ][ j ][k+1]
-        elif zk == Z[-1]:
-            Bx = w0 * Bx_grid[ i ][ j ][ k ] + w3 * Bx_grid[ i ][j+1][ k ]
-            By = w0 * By_grid[ i ][ j ][ k ] + w3 * By_grid[ i ][j+1][ k ]
-            Bz = w0 * Bz_grid[ i ][ j ][ k ] + w3 * Bz_grid[ i ][j+1][ k ]
+            if zk != Z[-1]:
+                Bx += w4 * Bx_grid[ i ][ j ][k+1]
+                By += w4 * By_grid[ i ][ j ][k+1]
+                Bz += w4 * Bz_grid[ i ][ j ][k+1]
         else:
-            Bx = w0 * Bx_grid[ i ][ j ][ k ] + w3 * Bx_grid[ i ][j+1][ k ] \
-               + w4 * Bx_grid[ i ][ j ][k+1] + w7 * Bx_grid[ i ][j+1][k+1]
-            By = w0 * By_grid[ i ][ j ][ k ] + w3 * By_grid[ i ][j+1][ k ] \
-               + w4 * By_grid[ i ][ j ][k+1] + w7 * By_grid[ i ][j+1][k+1]
-            Bz = w0 * Bz_grid[ i ][ j ][ k ] + w3 * Bz_grid[ i ][j+1][ k ] \
-               + w4 * Bz_grid[ i ][ j ][k+1] + w7 * Bz_grid[ i ][j+1][k+1]
-    elif yj == Y[-1]:
-        if zk == Z[-1]:
-            Bx = w0 * Bx_grid[ i ][ j ][ k ] + w1 * Bx_grid[i+1][ j ][ k ]
-            By = w0 * By_grid[ i ][ j ][ k ] + w1 * By_grid[i+1][ j ][ k ]
-            Bz = w0 * Bz_grid[ i ][ j ][ k ] + w1 * Bz_grid[i+1][ j ][ k ]
-        else:
-            Bx = w0 * Bx_grid[ i ][ j ][ k ] + w1 * Bx_grid[i+1][ j ][ k ] \
-               + w4 * Bx_grid[ i ][ j ][k+1] + w5 * Bx_grid[i+1][ j ][k+1]
-            By = w0 * By_grid[ i ][ j ][ k ] + w1 * By_grid[i+1][ j ][ k ] \
-               + w4 * By_grid[ i ][ j ][k+1] + w5 * By_grid[i+1][ j ][k+1]
-            Bz = w0 * Bz_grid[ i ][ j ][ k ] + w1 * Bz_grid[i+1][ j ][ k ] \
-               + w4 * Bz_grid[ i ][ j ][k+1] + w5 * Bz_grid[i+1][ j ][k+1]
-    elif zk == Z[-1]:
-        Bx = w0 * Bx_grid[ i ][ j ][ k ] + w1 * Bx_grid[i+1][ j ][ k ] \
-           + w2 * Bx_grid[i+1][j+1][ k ] + w3 * Bx_grid[ i ][j+1][ k ]
-        By = w0 * By_grid[ i ][ j ][ k ] + w1 * By_grid[i+1][ j ][ k ] \
-           + w2 * By_grid[i+1][j+1][ k ] + w3 * By_grid[ i ][j+1][ k ]
-        Bz = w0 * Bz_grid[ i ][ j ][ k ] + w1 * Bz_grid[i+1][ j ][ k ] \
-           + w2 * Bz_grid[i+1][j+1][ k ] + w3 * Bz_grid[ i ][j+1][ k ]
+            Bx += w3 * Bx_grid[ i ][j+1][ k ]
+            By += w3 * By_grid[ i ][j+1][ k ]
+            Bz += w3 * Bz_grid[ i ][j+1][ k ]
+            if zk != Z[-1]:
+                Bx += w4 * Bx_grid[ i ][ j ][k+1] + w7 * Bx_grid[ i ][j+1][k+1]
+                By += w4 * By_grid[ i ][ j ][k+1] + w7 * By_grid[ i ][j+1][k+1]
+                Bz += w4 * Bz_grid[ i ][ j ][k+1] + w7 * Bz_grid[ i ][j+1][k+1]
     else:
-        Bx = w0 * Bx_grid[ i ][ j ][ k ] + w1 * Bx_grid[i+1][ j ][ k ] \
-           + w2 * Bx_grid[i+1][j+1][ k ] + w3 * Bx_grid[ i ][j+1][ k ] \
-           + w4 * Bx_grid[ i ][ j ][k+1] + w5 * Bx_grid[i+1][ j ][k+1] \
-           + w6 * Bx_grid[i+1][j+1][k+1] + w7 * Bx_grid[ i ][j+1][k+1]
-        By = w0 * By_grid[ i ][ j ][ k ] + w1 * By_grid[i+1][ j ][ k ] \
-           + w2 * By_grid[i+1][j+1][ k ] + w3 * By_grid[ i ][j+1][ k ] \
-           + w4 * By_grid[ i ][ j ][k+1] + w5 * By_grid[i+1][ j ][k+1] \
-           + w6 * By_grid[i+1][j+1][k+1] + w7 * By_grid[ i ][j+1][k+1]
-        Bz = w0 * Bz_grid[ i ][ j ][ k ] + w1 * Bz_grid[i+1][ j ][ k ] \
-           + w2 * Bz_grid[i+1][j+1][ k ] + w3 * Bz_grid[ i ][j+1][ k ] \
-           + w4 * Bz_grid[ i ][ j ][k+1] + w5 * Bz_grid[i+1][ j ][k+1] \
-           + w6 * Bz_grid[i+1][j+1][k+1] + w7 * Bz_grid[ i ][j+1][k+1]
+        Bx += w1 * Bx_grid[i+1][ j ][ k ]
+        By += w1 * By_grid[i+1][ j ][ k ]
+        Bz += w1 * Bz_grid[i+1][ j ][ k ]
+        if yj == Y[-1]:
+            if zk != Z[-1]:
+                Bx += w4 * Bx_grid[ i ][ j ][k+1] + w5 * Bx_grid[i+1][ j ][k+1]
+                By += w4 * By_grid[ i ][ j ][k+1] + w5 * By_grid[i+1][ j ][k+1]
+                Bz += w4 * Bz_grid[ i ][ j ][k+1] + w5 * Bz_grid[i+1][ j ][k+1]
+        else:
+            Bx += w2 * Bx_grid[i+1][j+1][ k ] + w3 * Bx_grid[ i ][j+1][ k ]
+            By += w2 * By_grid[i+1][j+1][ k ] + w3 * By_grid[ i ][j+1][ k ]
+            Bz += w2 * Bz_grid[i+1][j+1][ k ] + w3 * Bz_grid[ i ][j+1][ k ]
+            if zk != Z[-1]:
+                Bx += w4 * Bx_grid[ i ][ j ][k+1] + w5 * Bx_grid[i+1][ j ][k+1] \
+                    + w6 * Bx_grid[i+1][j+1][k+1] + w7 * Bx_grid[ i ][j+1][k+1]
+                By += w4 * By_grid[ i ][ j ][k+1] + w5 * By_grid[i+1][ j ][k+1] \
+                    + w6 * By_grid[i+1][j+1][k+1] + w7 * By_grid[ i ][j+1][k+1]
+                Bz += w4 * Bz_grid[ i ][ j ][k+1] + w5 * Bz_grid[i+1][ j ][k+1] \
+                    + w6 * Bz_grid[i+1][j+1][k+1] + w7 * Bz_grid[ i ][j+1][k+1]
+        # full equation for xi != X[-1], yj != Y[-1], zk != Z[-1]
+        # B = w0 * B_grid[  i,  j,  k] + w1 * B_grid[i+1,  j,  k] + w2 * B_grid[i+1,j+1,  k] + w3 * B_grid[  i,j+1,  k] \
+        #   + w4 * B_grid[  i,  j,k+1] + w5 * B_grid[i+1,  j,k+1] + w6 * B_grid[i+1,j+1,k+1] + w7 * B_grid[  i,j+1,k+1]
     return Bx,By,Bz
 
-# this currently indexes out of bound
+# this function has not been tested
 def interp2D(X,Y,Bx_grid,By_grid,Bz_grid,xp,yp):
     '''
-    a very versatile but super inefficient 2D interpolation routine for 3D vectors
+    a very versatile but super inefficient 2D interpolation routine for 3 2D vectors
     '''
     dX = X[1]-X[0]
     dY = Y[1]-Y[0]
@@ -387,9 +292,22 @@ def interp2D(X,Y,Bx_grid,By_grid,Bz_grid,xp,yp):
     w1 = A1 / At
     w2 = A2 / At
     w3 = A3 / At
-    Bx = w0 * Bx_grid[i][j] + w1 * Bx_grid[i+1][j] + w2 * Bx_grid[i+1][j+1] + w3 * Bx_grid[i][j+1]
-    By = w0 * By_grid[i][j] + w1 * By_grid[i+1][j] + w2 * By_grid[i+1][j+1] + w3 * By_grid[i][j+1]
-    Bz = w0 * Bz_grid[i][j] + w1 * Bz_grid[i+1][j] + w2 * Bz_grid[i+1][j+1] + w3 * Bz_grid[i][j+1]
+    Bx = w0 * Bx_grid[i][j]
+    By = w0 * By_grid[i][j]
+    Bz = w0 * Bz_grid[i][j]
+    if xi == X[-1]:
+        if yj != Y[-1]:
+            Bx += w3 * Bx_grid[i][j+1]
+            By += w3 * By_grid[i][j+1]
+            Bz += w3 * Bz_grid[i][j+1]
+    else:
+        Bx += w1 * Bx_grid[i+1][j]
+        By += w1 * By_grid[i+1][j]
+        Bz += w1 * Bz_grid[i+1][j]
+        if yj != Y[-1]:
+            Bx += w2 * Bx_grid[i+1][j+1] + w3 * Bx_grid[i][j+1]
+            By += w2 * By_grid[i+1][j+1] + w3 * By_grid[i][j+1]
+            Bz += w2 * Bz_grid[i+1][j+1] + w3 * Bz_grid[i][j+1]
     return Bx,By,Bz
 
 
