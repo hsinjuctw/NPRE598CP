@@ -22,7 +22,10 @@ def frequency_correction(x):
         alpha = np.tan(x)/x
     return alpha
 
-def boris_bunemann( time, x0, params, fcorrection):#, Bfield, Efield):# assume static B and E fields
+def dirBorisBunemann( time, x0, params, fcorrection):
+    '''
+    This Boris-Bunemann routine calculates magnetic field in each iteration.
+    '''
     dt     = params[0]
     qmdt2  = params[1] # (q/m)*(dt/2)
     N      = np.size(time)
@@ -38,35 +41,40 @@ def boris_bunemann( time, x0, params, fcorrection):#, Bfield, Efield):# assume s
     for i in range(0,N): # 0 for velocity pushback (v[-1/2]), 1 to N for the N steps
         Ex,Ey,Ez = Efield(x,y,z)
         Bx,By,Bz = bearth.dipoleEarth(x,y,z)
-        # frequency correction: replace Omega*dt/2 with tan(Omega*dt/2)
-        if fcorrection == True:
-            #alpha = frequency_correction(qmdt2*np.sqrt(Bx*Bx+By*By+Bz*Bz))
-            alpha_x = frequency_correction(qmdt2*Bx)
-            alpha_y = frequency_correction(qmdt2*By)
-            alpha_z = frequency_correction(qmdt2*Bz)
-        else:
-            #alpha = 1.
-            alpha_x = 1.
-            alpha_y = 1.
-            alpha_z = 1.
         if i == 0:
+            # frequency correction: replace Omega*dt/2 with tan(Omega*dt/2)
+            if fcorrection == True:
+                alpha = frequency_correction(qmdt2*np.sqrt(Bx*Bx+By*By+Bz*Bz))
+                alpha_x = frequency_correction(qmdt2*Bx/2.)
+                alpha_y = frequency_correction(qmdt2*By/2.)
+                alpha_z = frequency_correction(qmdt2*Bz/2.)
+            else:
+                alpha = 1.
             # 1. half acceleration along E field: v = v[0]-(q/m)(dt/2/2)E (half timestep back)
-            vx -= qmdt2 * Ex * alpha_x / 2.
-            vy -= qmdt2 * Ey * alpha_y / 2.
-            vz -= qmdt2 * Ez * alpha_z / 2.
+            vx -= qmdt2 * Ex * alpha / 2.
+            vy -= qmdt2 * Ey * alpha / 2.
+            vz -= qmdt2 * Ez * alpha / 2.
             # 2. B field rotation (half timestep back)
-            tx = -qmdt2 * Bx * alpha_x / 2.
-            ty = -qmdt2 * By * alpha_y / 2.
-            tz = -qmdt2 * Bz * alpha_z / 2.
+            tx = -qmdt2 * Bx * alpha / 2.
+            ty = -qmdt2 * By * alpha / 2.
+            tz = -qmdt2 * Bz * alpha / 2.
         else:
+            # frequency correction: replace Omega*dt/2 with tan(Omega*dt/2)
+            if fcorrection == True:
+                alpha = frequency_correction(qmdt2*np.sqrt(Bx*Bx+By*By+Bz*Bz))
+                alpha_x = frequency_correction(qmdt2*Bx)
+                alpha_y = frequency_correction(qmdt2*By)
+                alpha_z = frequency_correction(qmdt2*Bz)
+            else:
+                alpha = 1.
             # 1. half acceleration along E field: v = v[n-1/2]+(q/m)(dt/2)E
-            vx += qmdt2 * Ex * alpha_x
-            vy += qmdt2 * Ey * alpha_y
-            vz += qmdt2 * Ez * alpha_z
+            vx += qmdt2 * Ex * alpha
+            vy += qmdt2 * Ey * alpha
+            vz += qmdt2 * Ez * alpha
             # 2. B field rotation
-            tx = qmdt2 * Bx * alpha_x
-            ty = qmdt2 * By * alpha_y
-            tz = qmdt2 * Bz * alpha_z
+            tx = qmdt2 * Bx * alpha
+            ty = qmdt2 * By * alpha
+            tz = qmdt2 * Bz * alpha
         tmagsq = tx**2 + ty**2 + tz**2
         sx = 2.*tx/(1+tmagsq)
         sy = 2.*ty/(1+tmagsq)
@@ -84,14 +92,14 @@ def boris_bunemann( time, x0, params, fcorrection):#, Bfield, Efield):# assume s
         vz += vpx*sy - vpy*sx
         if i == 0:
             # 3. half acceleration along E field (half timestep back)
-            vx -= qmdt2 * Ex * alpha_x / 2.
-            vy -= qmdt2 * Ey * alpha_y / 2.
-            vz -= qmdt2 * Ez * alpha_z / 2.
+            vx -= qmdt2 * Ex * alpha / 2.
+            vy -= qmdt2 * Ey * alpha / 2.
+            vz -= qmdt2 * Ez * alpha / 2.
         else:
             # 3. half acceleration along E field
-            vx += qmdt2 * Ex * alpha_x
-            vy += qmdt2 * Ey * alpha_y
-            vz += qmdt2 * Ez * alpha_z
+            vx += qmdt2 * Ex * alpha
+            vy += qmdt2 * Ey * alpha
+            vz += qmdt2 * Ez * alpha
             # 4. push position (no need to update for initial condition)
             x += vx*dt
             y += vy*dt
@@ -122,18 +130,18 @@ def boris_bunemann_interp( time, x0, params, fcorrection, Bfield):
     for i in range(0,N): # 0 for velocity pushback (v[-1/2]), 1 to N for the N steps
         Ex,Ey,Ez = Efield(x,y,z)
         Bx,By,Bz = bearth.dipoleEarth(x,y,z)
-        # frequency correction: replace Omega*dt/2 with tan(Omega*dt/2)
-        if fcorrection == True:
-            #alpha = frequency_correction(qmdt2*np.sqrt(Bx*Bx+By*By+Bz*Bz))
-            alpha_x = frequency_correction(qmdt2*Bx)
-            alpha_y = frequency_correction(qmdt2*By)
-            alpha_z = frequency_correction(qmdt2*Bz)
-        else:
-            #alpha = 1.
-            alpha_x = 1.
-            alpha_y = 1.
-            alpha_z = 1.
         if i == 0:
+            # frequency correction: replace Omega*dt/2 with tan(Omega*dt/2)
+            if fcorrection == True:
+                #alpha = frequency_correction(qmdt2*np.sqrt(Bx*Bx+By*By+Bz*Bz))
+                alpha_x = frequency_correction(qmdt2*Bx/2.)
+                alpha_y = frequency_correction(qmdt2*By/2.)
+                alpha_z = frequency_correction(qmdt2*Bz/2.)
+            else:
+                #alpha = 1.
+                alpha_x = 1.
+                alpha_y = 1.
+                alpha_z = 1.
             # 1. half acceleration along E field: v = v[0]-(q/m)(dt/2/2)E (half timestep back)
             vx -= qmdt2 * Ex * alpha_x / 2.
             vy -= qmdt2 * Ey * alpha_y / 2.
@@ -143,6 +151,17 @@ def boris_bunemann_interp( time, x0, params, fcorrection, Bfield):
             ty = -qmdt2 * By * alpha_y / 2.
             tz = -qmdt2 * Bz * alpha_z / 2.
         else:
+            # frequency correction: replace Omega*dt/2 with tan(Omega*dt/2)
+            if fcorrection == True:
+                #alpha = frequency_correction(qmdt2*np.sqrt(Bx*Bx+By*By+Bz*Bz))
+                alpha_x = frequency_correction(qmdt2*Bx)
+                alpha_y = frequency_correction(qmdt2*By)
+                alpha_z = frequency_correction(qmdt2*Bz)
+            else:
+                #alpha = 1.
+                alpha_x = 1.
+                alpha_y = 1.
+                alpha_z = 1.
             # 1. half acceleration along E field: v = v[n-1/2]+(q/m)(dt/2)E
             vx += qmdt2 * Ex * alpha_x
             vy += qmdt2 * Ey * alpha_y
