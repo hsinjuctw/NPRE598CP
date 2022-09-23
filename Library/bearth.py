@@ -4,7 +4,7 @@ import Library.coord as coord
 M  = -8e15 # dipole moment of Earth [Tm^3]
 RE = 6.371e6
 
-def dipoleEarthSph(r,theta,phi):
+def dipoleEarthSph(r,theta):
     # reference: eq.1-3 https://ccmc.gsfc.nasa.gov/static/files/Dipole.pdf
     #M  = -8.e15 # dipole moment of Earth [Tm^3]
     Br = 2.*M*np.cos(theta)/r**3
@@ -70,7 +70,7 @@ def getEarthDipoleCSC(X,Y,Z):
                     Bz[i,j,k]   = np.nan
                 else:
                     r,theta,phi = coord.car2sph( X[i],Y[j],Z[k] )
-                    Br,Bt,Bp    = dipoleEarthSph( r,theta,phi )
+                    Br,Bt,Bp    = dipoleEarthSph( r,theta )
                     Bx[i,j,k],By[i,j,k],Bz[i,j,k] = coord.sph2carV(Br,Bt,Bp,r,theta,phi)
                     Bmag[i,j,k] = np.sqrt( Bx[i,j,k]**2 + By[i,j,k]**2 + Bz[i,j,k]**2 )
     return Bx,By,Bz,Bmag
@@ -98,3 +98,24 @@ def getEarthDipole(X,Y,Z):
                     Bx[i,j,k],By[i,j,k],Bz[i,j,k] = dipoleEarth(X[i],Y[j],Z[k])
                     Bmag[i,j,k] = np.sqrt( Bx[i,j,k]**2 + By[i,j,k]**2 + Bz[i,j,k]**2 )
     return Bx,By,Bz,Bmag
+
+def getEarthDipoleSph(R,Theta):
+    '''
+    Get the dipole field (Br, Btheta, Bphi) of the Earth in Spherical.
+    '''
+    Nr = len(R)
+    Nt = len(Theta)
+    Bmag = np.empty((Nr,Nt))
+    Br   = np.empty((Nr,Nt))
+    Bt   = np.empty((Nr,Nt))
+    Bp   = np.empty((Nr,Nt))
+    for i in range(0,Nr):
+        for j in range(0,Nt):
+            if abs(R[i])<RE:
+                Bmag[i,j] = np.nan
+                Br[i,j]   = np.nan
+                Bt[i,j]   = np.nan
+                Bp[i,j]   = np.nan
+            else:
+                Br[i,j],Bt[i,j],Bp[i,j] = dipoleEarthSph(R[i],Theta[j])
+    return Br,Bt,Bp
