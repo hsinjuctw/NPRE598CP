@@ -20,7 +20,8 @@ def main():
     Y = np.linspace( -20.*RE, 20.*RE, Ny)
     Z = np.linspace( -20.*RE, 20.*RE, Nz)
     
-    Bx,By,Bz,Bmag = bearth.getEarthDipole(X,Y,Z)
+    #Bx,By,Bz,Bmag = bearth.getEarthDipole(X,Y,Z)
+    Bx,By,Bz,Bmag = bearth.getEarthDipoleCSC(X,Y,Z)
 
     plt.figure(1)
     XX,ZZ = np.meshgrid(X,Z)
