@@ -60,6 +60,19 @@ def main():
     #     plabel = 'Boris–Bunemann without frequency correction'
     fig = plt.figure(1)
     ax = fig.add_subplot(111)
+    # Grid of x, y points
+    RE = 6.371e6
+    Nx, Nz = 100,100
+    x = np.linspace(-20.*RE, 20.*RE, Nx)
+    z = np.linspace(-20.*RE, 20.*RE, Nz)
+    XX, ZZ = np.meshgrid(x, z)
+    # Electric field vector, E=(Ex, Ey), as separate components
+    Bx, Bz = np.zeros((Nz, Nx)), np.zeros((Nz, Nx))
+    Bx, Bz = bearth.dipoleEarthX0Z(x=XX, z=ZZ)
+    # https://scipython.com/blog/visualizing-a-vector-field-with-matplotlib/
+    # Plot the streamlines with an appropriate colormap and arrow style
+    color = 2 * np.log(np.hypot(Bx, Bz))
+    ax.streamplot(x/RE, z/RE, Bx, Bz, color=color,arrowstyle='->', arrowsize=1.5)
     plt.plot( X[:,0]/RE, X[:,2]/RE, 'k-', label='Trajectory projection on $XZ$-plane' )
     ax.add_artist(Circle((0,0), 1, color='b'))
     plt.xlabel('$x$ [$R_E$]')
@@ -67,6 +80,8 @@ def main():
     plt.axis('equal')
     plt.legend(loc=3)
     plt.savefig('boris_XZ.png')
+
+
     fig = plt.figure(2)
     ax = fig.add_subplot(111)
     plt.plot( X[:,0]/RE, X[:,1]/RE, 'k-', label='Trajectory projection on $XY$-plane' )
