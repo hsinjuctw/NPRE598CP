@@ -11,6 +11,23 @@ mp = 1.6726219e-27
 
 def main():
     RE = 6.371e6 # Earth radius [m]
+
+    ##################################
+    ##### EARTH'S MAGNETIC FIELD #####
+    ##################################
+    # SPHERICAL CASE
+    # Nr = 101
+    # Nt = 101
+
+    # R     = np.linspace( RE,   20.*RE, Nr )
+    # Theta = np.linspace( 0., 2.*np.pi, Nt )
+
+    # Br,Btheta,Bphi = bearth.getEarthDipoleSph(R,Theta)
+    # Bmag = Br**2+Btheta**2+Bphi**2
+    # print(np.nanmax(Bmag))
+    # print(np.nanmin(Bmag))
+
+
     ###############################
     ##### PARTICLE TRAJECTORY #####
     ###############################
@@ -20,10 +37,19 @@ def main():
     Q = -qe
     M = me
 
+    # # # cyclotron frequency [rad/s]
+    # # omega_c = np.abs(Q)*Bmag/M
+    # # # cyclotron period [s]
+    # # Tc = 2.*np.pi/omega_c
+    # # # magnitude of v_perp
+    # # v0 = np.sqrt(vx0**2+vy0**2)
+    # # # Larmor radius
+    # # r_L = v0/omega_c
+
     Tev = 1.e4             # particle temperature in eV
     T = particle.eV2K(Tev) # particle temperature in K
     v = particle.E2v(Tev,M)
-    Np = 100            # particle count
+    Np = 1000            # particle count
 
     Lr = 19.*RE
     Lp = 2.*np.pi
@@ -46,7 +72,7 @@ def main():
     fcorrection = True
 
     # time grids [s]
-    timetot = 1
+    timetot = 10
     N_per_sec = 100
     time = np.linspace(0.,timetot,N_per_sec*timetot+1)
     dt = time[1]-time[0]
@@ -54,7 +80,7 @@ def main():
     BB = np.empty((Np,len(time),6))
     # BB = np.empty((Np,len(time),10))
     # mu = np.empty((Np,len(time)))
-    # E = np.empty((Np,len(time)))
+    E = np.empty((Np,len(time)))
 
     for n in range(0,Np):
         Loc[n,0],Loc[n,1],Loc[n,2] = coord.sph2car(Rr[n],np.pi/2.,Rp[n])
@@ -75,20 +101,19 @@ def main():
         params = np.array((dt, Q/M*dt/2.))
         # Boris integration
         BB[n,:,:] = particle.dirBorisBunemann(time, BB0, params, fcorrection)
-        # for t in range(0,len(time)):
-        #     E[n,t] = .5*M*(BB[n,t,3]**2+BB[n,t,4]**2+BB[n,t,5]**2)
-        #     mu[n,t] = .5*particle.lorentz(np.sqrt(BB[n,t,3]**2+BB[n,t,4]**2+BB[n,t,5]**2))*M*(BB[n,t,7]**2+BB[n,t,8]**2+BB[n,t,9]**2)/BB[n,t,6]
+        for t in range(0,len(time)):
+            E[n,t] = .5*M*(BB[n,t,3]**2+BB[n,t,4]**2+BB[n,t,5]**2)
+    #     #     mu[n,t] = .5*particle.lorentz(np.sqrt(BB[n,t,3]**2+BB[n,t,4]**2+BB[n,t,5]**2))*M*(BB[n,t,7]**2+BB[n,t,8]**2+BB[n,t,9]**2)/BB[n,t,6]
 
-    # fig = plt.figure(5)
-    # ax = fig.add_subplot(111)
-    # plt.plot( time, np.transpose(E))
-    # plt.xlabel('time [s]')
-    # # plt.ylabel('$\mu$')
-    # plt.ylabel('$E_k$')
-    # # plt.title('Magnetic Moment')
-    # plt.title('Kinetic Energy')
-    # plt.legend(loc=3)
-
+    fig = plt.figure(5)
+    ax = fig.add_subplot(111)
+    plt.plot( time, np.transpose(E))
+    plt.xlabel('time [s]')
+    # plt.ylabel('$\mu$')
+    plt.ylabel('$E_k$')
+    # plt.title('Magnetic Moment')
+    plt.title('Kinetic Energy')
+    plt.legend(loc=3)
 
     fig = plt.figure(0)
     ax = fig.add_subplot(111)
