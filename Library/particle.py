@@ -1,4 +1,3 @@
-from os import wait4
 import numpy as np
 #import matplotlib.pyplot as plt
 import Library.bearth as bearth
@@ -281,8 +280,8 @@ def maxwellian1D(m,v,T):
     f = np.sqrt(m/(2.*np.pi*kB*T)) * np.exp(-m*v**2/(2.*kB*T))
     return f
 
-def findVelocity(percentile, m, T):
-    return -(2.*kB*T)*np.log(percentile/np.sqrt(m/(2.*np.pi*kB*T)))/m
+# def findVelocity(percentile, m, T):
+#     return -(2.*kB*T)*np.log(percentile/np.sqrt(m/(2.*np.pi*kB*T)))/m
 
 # https://notebook.community/tommyogden/quantum-python-lectures/11_Monte-Carlo-Maxwell-Boltzmann-Distributions
 def maxwellianCDF1D(m,v,T):
