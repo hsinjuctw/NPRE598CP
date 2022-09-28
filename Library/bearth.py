@@ -126,11 +126,19 @@ def getEarthDipoleSph(R,Theta):
 #         print(r,theta)
 #     return R,Theta
 
-def dipoleFieldline3D(x,y,z,dx,dy,dz,nstep):
+def dipoleFieldline3D(x0,y0,z0,dx,dy,dz):#,nstep):
+    '''
+    Returns field line through (x0,y0,z0) in X,Y,Z arrays.
+    This method does calculations at (x0,y0,z0) twice and saves (x0,y0,z0) twice.
+    '''
+    x = x0
+    y = y0
+    z = z0
     X = [x]
     Y = [y]
     Z = [z]
-    for i in range(0,nstep):
+    # traces from (x0,y0,z0) in +b direction
+    while x**2+z**2 > RE**2 and abs(x) <= 20.*RE and abs(y) <= 20.*RE and abs(z) <= 20.*RE:
         Bx,By,Bz = dipoleEarth(x,y,z)
         Bmag     = np.sqrt(Bx**2+By**2+Bz**2)
         x       += dx*Bx/Bmag
@@ -139,17 +147,39 @@ def dipoleFieldline3D(x,y,z,dx,dy,dz,nstep):
         X        = np.append(X,x)
         Y        = np.append(Y,y)
         Z        = np.append(Z,z)
-        print(x,y,z)
+    # reverses the order so that (x0,y0,z0) is at the end of the array
+    X = X[::-1]
+    Y = Y[::-1]
+    Z = Z[::-1]
+    x = x0
+    y = y0
+    z = z0
+    # traces from (x0,y0,z0) in -b direction
+    while x**2+y**2+z**2 > RE**2 and abs(x) <= 20.*RE and abs(y) <= 20.*RE and abs(z) <= 20.*RE:
+        Bx,By,Bz = dipoleEarth(x,y,z)
+        Bmag     = np.sqrt(Bx**2+By**2+Bz**2)
+        x       -= dx*Bx/Bmag
+        y       -= dy*By/Bmag
+        z       -= dz*Bz/Bmag
+        X        = np.append(X,x)
+        Y        = np.append(Y,y)
+        Z        = np.append(Z,z)
     return X,Y,Z
 
 def dipoleFieldline2D(Lshell,MLT,dx,dz):
+    '''
+    Returns field line through L = Lshell and MLT = MLT in X,Y,Z arrays.
+    This method saves the initial position twice.
+    Calculations are done in 2D in +b direction, and the field line is mirrored for -b direction.
+    Then, the field line is rotated to the desired MLT cut.
+    '''
     x = Lshell*RE
     y = 0.
     z = 0.
     X = [x]
     Z = [z]
     # 1st quadrant
-    while x**2+z**2 > RE**2:
+    while x**2+z**2 > RE**2 and abs(x) <= 20.*RE and abs(y) <= 20.*RE and abs(z) <= 20.*RE:
         Bx,By,Bz = dipoleEarth(x,y,z)
         Bmag     = np.sqrt(Bx**2+By**2+Bz**2)
         x       += dx*Bx/Bmag
