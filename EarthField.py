@@ -26,10 +26,10 @@ def main():
     Bx,By,Bz,Bmag = bearth.getEarthDipole(X,Y,Z)
     #Bx,By,Bz,Bmag = bearth.getEarthDipoleCSC(X,Y,Z)
 
-
     Lshell = 10.
     MLT    = 12.
     dX  = .01*RE
+    # dY  = .01*RE
     dZ  = .01*RE
 
     FLx0,FLy0,FLz0 = bearth.dipoleFieldline2D(5.,12.,dX,dZ)
@@ -40,6 +40,15 @@ def main():
     FLx5,FLy5,FLz5 = bearth.dipoleFieldline2D(15.,0.,dX,dZ)
     FLx6,FLy6,FLz6 = bearth.dipoleFieldline2D(20.,12.,dX,dZ)
     FLx7,FLy7,FLz7 = bearth.dipoleFieldline2D(20.,0.,dX,dZ)
+
+    # FLx0,FLy0,FLz0 = bearth.dipoleFieldline3D(5.*RE,0.,0.,dX,dY,dZ)
+    # FLx1,FLy1,FLz1 = bearth.dipoleFieldline3D(-5.*RE,0.,0.,dX,dY,dZ)
+    # FLx2,FLy2,FLz2 = bearth.dipoleFieldline3D(10.*RE,0.,0.,dX,dY,dZ)
+    # FLx3,FLy3,FLz3 = bearth.dipoleFieldline3D(-10.*RE,0.,0.,dX,dY,dZ)
+    # FLx4,FLy4,FLz4 = bearth.dipoleFieldline3D(15.*RE,0.,0.,dX,dY,dZ)
+    # FLx5,FLy5,FLz5 = bearth.dipoleFieldline3D(-15.*RE,0.,0.,dX,dY,dZ)
+    # FLx6,FLy6,FLz6 = bearth.dipoleFieldline3D(20.*RE,0.,0.,dX,dY,dZ)
+    # FLx7,FLy7,FLz7 = bearth.dipoleFieldline3D(-20.*RE,0.,0.,dX,dY,dZ)
 
     # record end time
     end = time.time()
