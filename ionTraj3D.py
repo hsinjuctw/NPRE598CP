@@ -35,6 +35,7 @@ def main():
     # charge [C], mass [kg]
     Q = qe
     M = mp*131.29 # Xe
+    # M = mp*15.999 # O
     # M = mp*7
     # x0 = -10.*RE
     # y0 = 0.
@@ -110,7 +111,7 @@ def main():
     #         color=tSec,             # set color to an array/list of desired values
             # colorscale='rdbu',   # choose a colorscale
             opacity=0.8,
-            showscale = True
+            # showscale = False
         )
     )])
     for i in range(8):
@@ -121,7 +122,7 @@ def main():
                 size=1,
                 color='black',
                 opacity=0.8,
-                showscale = True
+                # showscale = False
             )
             ))
 
@@ -139,6 +140,7 @@ def main():
         colorscale=[[0, 'dimgray'], [1, 'dimgray']],
         showscale = False))
     fig.update_layout(scene_aspectmode='data')
+    fig.update_coloraxes(showscale=False)
     fig.show()
     # fig.write_image("Traj.png")
 
